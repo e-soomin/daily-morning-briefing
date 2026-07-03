@@ -115,8 +115,9 @@
   .news-title {
     font-size: 14px; font-weight: 600; line-height: 1.4;
     margin-bottom: 6px; color: #1d1d1f; padding-right: 40px;
-    word-break: keep-all; overflow-wrap: break-word;
+    word-break: keep-all; overflow-wrap: break-word; cursor: pointer;
   }
+  .news-title:hover { text-decoration: underline; }
   .news-summary { font-size: 13px; color: #3a3a3c; line-height: 1.55; margin-bottom: 8px; word-break: keep-all; overflow-wrap: break-word; }
   .news-source { font-size: 11px; color: #86868b; margin-bottom: 8px; }
   .news-source a { color: #86868b; text-decoration: none; }
@@ -357,6 +358,12 @@ function allDates() { return Object.keys(HISTORY_DATA).sort((a,b) => a.localeCom
 function cardId(title) { return 'c' + [...title].reduce((a,c) => (a*31+c.charCodeAt(0))|0, 0).toString(36).replace('-','_'); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+/* ── Title click → open source ────────────────────── */
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('.news-title[data-url]');
+  if (t && t.dataset.url) window.open(t.dataset.url, '_blank', 'noopener');
+});
+
 /* ── Date select ───────────────────────────────────── */
 function selectDate(date) {
   const data = HISTORY_DATA[date];
@@ -412,7 +419,7 @@ function renderCard(item, cat, region) {
       <div class="card-actions">
         <button class="card-btn ${scrapped?'scrapped':''}" id="si-${id}" onclick="toggleScrap('${id}')" title="스크랩">🔖</button>
       </div>
-      <div class="news-title">${esc(item.title)}</div>
+      <div class="news-title" data-url="${esc(item.source_url||'')}" title="원문 보기: ${esc(item.source_name||'')}">${esc(item.title)}</div>
       <div class="news-summary">${esc(item.summary)}</div>
       <div class="news-source">출처: <a href="${esc(item.source_url||'#')}" target="_blank">${esc(item.source_name||'출처 없음')}</a></div>
       <div class="news-insight">💡 ${esc(item.insight)}</div>
