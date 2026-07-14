@@ -387,7 +387,10 @@ function onScrollArea() {
   const y = area.scrollTop;
   const dy = y - sbLastY;
   const guardOk = Date.now() >= sbGuardUntil;
-  if (dy > 6) bar.classList.add('sb-collapsed');
+  // 최상단 부근(예: 오버스크롤 바운스로 살짝 내려갔다 튕겨 돌아오는 경우)에서는
+  // 절대 접히지 않도록 최소 이동 거리(SB_MIN_Y) 이상 내려간 경우에만 접는다.
+  const SB_MIN_Y = 32;
+  if (dy > 6 && y > SB_MIN_Y) bar.classList.add('sb-collapsed');
   else if (guardOk && (dy < -6 || y <= 8)) bar.classList.remove('sb-collapsed'); // 최상단 근처면 델타와 무관하게 항상 펼침
   sbLastY = y;
 }
