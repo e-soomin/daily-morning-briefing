@@ -65,6 +65,11 @@
     background: #fff; border-radius: 12px; margin-bottom: 10px;
     border-left: 3px solid #F96A00; padding: 10px 12px;
     display: none; align-items: baseline; gap: 8px;
+    max-height: 100px; overflow: hidden; opacity: 1;
+    transition: max-height 0.28s ease, opacity 0.2s ease, padding 0.28s ease, margin-bottom 0.28s ease, border-left-width 0.2s ease;
+  }
+  .summary-bar.sb-collapsed {
+    max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border-left-width: 0;
   }
   .sum-label { font-size: 10px; font-weight: 700; color: #F96A00; letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0; }
   .sum-preview { font-size: 12px; color: #3a3a3c; line-height: 1.5; }
@@ -363,6 +368,21 @@ document.addEventListener('click', (e) => {
   const t = e.target.closest('.news-title[data-url]');
   if (t && t.dataset.url) window.open(t.dataset.url, '_blank', 'noopener');
 });
+
+/* ── Summary bar: collapse on scroll down, expand on scroll up ── */
+let sbLastY = 0;
+function onScrollArea() {
+  const area = document.getElementById('scroll-area');
+  const bar  = document.getElementById('summary-bar');
+  if (!area || !bar) return;
+  const y = area.scrollTop;
+  const dy = y - sbLastY;
+  if (y <= 8) bar.classList.remove('sb-collapsed');
+  else if (dy > 6) bar.classList.add('sb-collapsed');
+  else if (dy < -6) bar.classList.remove('sb-collapsed');
+  sbLastY = y;
+}
+document.getElementById('scroll-area').addEventListener('scroll', onScrollArea, { passive: true });
 
 /* ── Date select ───────────────────────────────────── */
 function selectDate(date) {
