@@ -377,8 +377,9 @@ document.addEventListener('click', (e) => {
   if (t && t.dataset.url) window.open(t.dataset.url, '_blank', 'noopener');
 });
 
-/* ── Summary bar: collapse on scroll down, expand ONLY on scroll up ── */
+/* ── Summary bar: collapse on scroll down, expand ONLY on a real scroll-up gesture ── */
 let sbLastY = 0;
+let sbGuardUntil = 0; // 이 시각까지는 '펼치기'를 무시(탭/날짜 전환 직후 잔여 스크롤 이벤트 방지). 시간 기반이라 이벤트 유무와 무관하게 항상 자동 해제됨.
 function onScrollArea() {
   const area = document.getElementById('scroll-area');
   const bar  = document.getElementById('summary-bar');
@@ -386,18 +387,19 @@ function onScrollArea() {
   const y = area.scrollTop;
   const dy = y - sbLastY;
   if (dy > 6) bar.classList.add('sb-collapsed');
-  else if (dy < -6) bar.classList.remove('sb-collapsed');
+  else if (dy < -6 && Date.now() >= sbGuardUntil) bar.classList.remove('sb-collapsed');
   sbLastY = y;
 }
 document.getElementById('scroll-area').addEventListener('scroll', onScrollArea, { passive: true });
 
 // 탭/날짜 전환으로 스크롤 위치를 프로그램적으로 top(0)에 되돌릴 때는
 // 요약바 상태(collapsed 여부)는 건드리지 않고 기준점(sbLastY)만 동기화한다.
-// (scrollTop이 이미 0이면 'scroll' 이벤트가 아예 발생하지 않는 브라우저도 있어
-//  이벤트에 의존하지 않고 즉시 동기적으로 처리한다.)
+// 또한 전환 직후 짧은 시간 동안은 관성 스크롤 등 잔여 이벤트로 인한
+// '펼치기' 오작동을 막기 위해 시간 기반 가드를 건다(이벤트 대기 방식이 아니므로 영구히 걸릴 위험이 없음).
 function resetScrollTopSilently() {
   document.getElementById('scroll-area').scrollTop = 0;
   sbLastY = 0;
+  sbGuardUntil = Date.now() + 400;
 }
 
 /* ── Date select ───────────────────────────────────── */
